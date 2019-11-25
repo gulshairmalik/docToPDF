@@ -26,7 +26,7 @@ app.get('/',(req,res) => {
 });
 
 app.get('/convert',(req,res) => {
-    res.render('index');
+    res.redirect('/');
 });
 
 app.post('/convert',upload.single('file'),(req,res) => {
@@ -34,7 +34,6 @@ app.post('/convert',upload.single('file'),(req,res) => {
     converter.generatePdf('public/uploads/'+req.file.originalname, function(err, result) {
         if (result.status === 0) {
           let outputFile = result.outputFile.replace('public/','');
-          let filename = outputFile.replace('uploads/','');
           res.render('index',{file:outputFile});
         }
     });
