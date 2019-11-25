@@ -6,3 +6,4 @@ Simple Node app that converts any doc or image to PDF.
 - Install unoconv. You can install unoconv on linux by `sudo apt install unoconv`
 - After installing `unoconv`, run `npm install` in root directory
 - Run the project by `node app.js`
+- Now, check the browser, your app will be running on http://localhost:3000
