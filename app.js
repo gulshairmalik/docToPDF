@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const multer  = require('multer');
-const converter = require('office-converter')();
+//const converter = require('office-converter')();
+const libre = require('libreoffice-convert');
+const fs = require('fs');
 const app = express();
 
 const storage = multer.diskStorage({
@@ -31,12 +33,28 @@ app.get('/convert',(req,res) => {
 
 app.post('/convert',upload.single('file'),(req,res) => {
     
-    converter.generatePdf('public/uploads/'+req.file.originalname, function(err, result) {
-        if (result.status === 0) {
-          let outputFile = result.outputFile.replace('public/','');
-          res.render('index',{file:outputFile});
+    // converter.generatePdf('public/uploads/'+req.file.originalname, function(err, result) {
+    //     if (result.status === 0) {
+    //       let outputFile = result.outputFile.replace('public/','');
+    //       res.render('index',{file:outputFile});
+    //     }
+    // });
+
+    const outputPath = path.join(__dirname, `public/uploads/${req.file.originalname.split('.')[0]}.pdf`);
+    
+    // Read file
+    const file = fs.readFileSync('public/uploads/'+req.file.originalname);
+    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    libre.convert(file, 'pdf', undefined, (err, done) => {
+        if (err) {
+          console.log(`Error converting file: ${err}`);
         }
+        // Here in done you have pdf file which you can save or transfer in another stream
+        fs.writeFileSync(outputPath, done);
+        let outputFile = `uploads/${req.file.originalname.split('.')[0]}.pdf`;
+        res.render('index',{file:outputFile});
     });
+    
 
 });
 
