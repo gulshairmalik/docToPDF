@@ -1,8 +1,9 @@
 const express = require('express');
 const path = require('path');
 const multer  = require('multer');
+const spawn = require("child_process").spawn;
 //const converter = require('office-converter')();
-const libre = require('libreoffice-convert');
+//const libre = require('libreoffice-convert');
 const fs = require('fs');
 const app = express();
 
@@ -32,6 +33,19 @@ app.get('/convert',(req,res) => {
 });
 
 app.post('/convert',upload.single('file'),(req,res) => {
+
+// Conversion using Python script
+
+  let sourceFile = './public/uploads/'+req.file.originalname ;
+  const pythonProcess = spawn('python',["./script.py", sourceFile]);
+  
+  pythonProcess.stdout.on('data', (data) => {
+    let outputFile = `uploads/${req.file.originalname.split('.')[0]}.pdf`;
+    res.render('index',{file:outputFile});
+  });
+
+
+  // Conversion using package 'office-convertor'
     
     // converter.generatePdf('public/uploads/'+req.file.originalname, function(err, result) {
     //     if (result.status === 0) {
@@ -40,21 +54,22 @@ app.post('/convert',upload.single('file'),(req,res) => {
     //     }
     // });
 
-    const outputPath = path.join(__dirname, `public/uploads/${req.file.originalname.split('.')[0]}.pdf`);
     
-    // Read file
-    const file = fs.readFileSync('public/uploads/'+req.file.originalname);
-    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-    libre.convert(file, 'pdf', undefined, (err, done) => {
-        if (err) {
-          console.log(`Error converting file: ${err}`);
-        }
-        // Here in done you have pdf file which you can save or transfer in another stream
-        fs.writeFileSync(outputPath, done);
-        let outputFile = `uploads/${req.file.originalname.split('.')[0]}.pdf`;
-        res.render('index',{file:outputFile});
-    });
-    
+  // Conversion Using package 'libreoffice-convert'
+
+    // const outputPath = path.join(__dirname, `public/uploads/${req.file.originalname.split('.')[0]}.pdf`);
+    // // Read file
+    // const file = fs.readFileSync('public/uploads/'+req.file.originalname);
+    // // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    // libre.convert(file, 'pdf', undefined, (err, done) => {
+    //     if (err) {
+    //       console.log(`Error converting file: ${err}`);
+    //     }
+    //     // Here in done you have pdf file which you can save or transfer in another stream
+    //     fs.writeFileSync(outputPath, done);
+    //     let outputFile = `uploads/${req.file.originalname.split('.')[0]}.pdf`;
+    //     res.render('index',{file:outputFile});
+    // });   
 
 });
 
